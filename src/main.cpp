@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "object_scanner");
     ros::NodeHandle n;
-    
+    ROS_INFO_STREAM("object_scanner main started");
     ObjectScanner app();
     
     while (ros::ok())

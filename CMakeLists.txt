@@ -27,7 +27,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-set(SOURCE_FILES src/main.cpp src/object_scanner.cpp)
+set(SOURCE_FILES src/main.cpp src/object_scanner.cpp src/robots_mover.cpp src/robot_mover.cpp src/tsdf.cpp src/cloud_processor.cpp)
 add_executable(object_scanner ${SOURCE_FILES})
 target_link_libraries(object_scanner ${catkin_LIBRARIES}
 				    ${PCL_LIBRARIES} )
