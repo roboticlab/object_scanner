@@ -7,3 +7,7 @@ ObjectScanner::ObjectScanner()
     _tsdf = new TSDF();
     _cloud_processor = new CloudProcessor();
 }
+ObjectScanner::~ObjectScanner()
+{
+
+}

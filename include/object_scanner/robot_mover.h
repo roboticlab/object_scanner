@@ -7,6 +7,7 @@ class RobotMover
 {
 public:
     RobotMover();
+    ~RobotMover();
 private:
     
 };

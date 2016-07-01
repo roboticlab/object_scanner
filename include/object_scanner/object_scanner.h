@@ -10,6 +10,7 @@ class ObjectScanner
 {
 public:
     ObjectScanner();
+    ~ObjectScanner();
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;

@@ -5,3 +5,7 @@ RobotsMover::RobotsMover()
     camera_mover = new RobotMover();
     table_mover = new RobotMover();
 }
+RobotsMover::~RobotsMover()
+{
+
+}

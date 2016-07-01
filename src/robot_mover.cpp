@@ -3,3 +3,7 @@ RobotMover::RobotMover()
 {
     ROS_INFO_STREAM("RobotMover created");
 }
+RobotMover::~RobotMover()
+{
+
+}

@@ -7,6 +7,7 @@ class TSDF
 {
 public:
     TSDF();
+    ~TSDF();
 private:
     
 };

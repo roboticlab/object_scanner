@@ -8,6 +8,7 @@ class RobotsMover
 {
 public:
     RobotsMover();
+    ~RobotsMover();
 private:
     RobotMover* camera_mover;
     RobotMover* table_mover;
