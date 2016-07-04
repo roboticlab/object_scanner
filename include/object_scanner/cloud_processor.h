@@ -21,6 +21,9 @@
 #include <tf_conversions/tf_eigen.h>
 
 #include <pcl_conversions/pcl_conversions.h>
+
+typedef pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> ColorHandlerTXYZRGB;
+
 // struct IcpParams
 // {
 // //     int max_iterations = 500;
@@ -31,7 +34,8 @@ class CloudProcessor
 public:
     CloudProcessor();
     ~CloudProcessor();
-    void processCloud();
+    void processCloud(int times_num);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getAlighnedCloud();
 private:
     std::string subs_cloud_topic;
     
@@ -39,6 +43,7 @@ private:
     ros::Subscriber cloud_subscriber;
     
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp2_cloud;
     
@@ -46,11 +51,13 @@ private:
     void cutCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void alighnCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
-    
+    void getIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
+    tf::StampedTransform getTransform(std::string parent, std::string child);
     //PCL methods
-    void tranformCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output, Eigen::Affine3d transform);
+    void transformCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output, Eigen::Affine3d transform);
     void passThroughFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output, 
 			   std::string field, float nx, float px,bool keep_organized);
+    void removeNaNs(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void bilateralFilter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output, float sigma_r, float sigma_s);
     void icpAlighn(pcl::PointCloud< pcl::PointXYZRGB >::Ptr _source, pcl::PointCloud< pcl::PointXYZRGB >::Ptr _target, pcl::PointCloud< pcl::PointXYZRGB >::Ptr _cloud_out);
     

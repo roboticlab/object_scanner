@@ -7,12 +7,18 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "object_scanner");
     ros::NodeHandle n;
+    ros::AsyncSpinner spinner(0);
+    spinner.start();
     ROS_INFO_STREAM("object_scanner main started");
-    ObjectScanner* app = new ObjectScanner();
+    ObjectScanner* app = new ObjectScanner();   
     
-    while (ros::ok())
+    ros::Duration(1.0).sleep();
+ 
+    app->run();  
+    
+    while(ros::ok())
     {
-
+	
     }
 
     return 0;
