@@ -9,6 +9,9 @@ class RobotsMover
 public:
     RobotsMover();
     ~RobotsMover();
+    
+    void rotateTableToStartPos();
+    void rotateTable(int, float);
 private:
     RobotMover* camera_mover;
     RobotMover* table_mover;
