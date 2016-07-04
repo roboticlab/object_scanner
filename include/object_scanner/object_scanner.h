@@ -9,8 +9,11 @@
 class ObjectScanner
 {
 public:
-    ObjectScanner();
+    ObjectScanner(float, float, float, float, int, int, int, Eigen::Affine3d);
     ~ObjectScanner();
+	template <typename PointT> void IntegrateCloud(pcl::PointCloud<PointT>, Eigen::Affine3d);	
+	pcl::PointCloud<pcl::PointNormal>::Ptr GetCloud(Eigen::Affine3d);
+	pcl::PolygonMesh GetMesh();
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;

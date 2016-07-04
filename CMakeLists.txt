@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen REQUIRED)
 find_package(FLANN REQUIRED)
-find_package(PCL 1.8 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES object_scanner
@@ -32,6 +32,14 @@ include_directories(SYSTEM
   ${PCL_INCLUDE_DIRS}
   
 )
+add_library (libTSDF SHARED
+	src/libTSDF/octree.cpp
+	src/libTSDF/tsdf_volume_octree.cpp
+	src/libTSDF/tsdf_interface.cpp
+	src/libTSDF/marching_cubes_tsdf_octree.cpp
+	src/tsdf.cpp )
+target_link_libraries(libTSDF ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 # add_library(cloud_processor src/object_scanner.cpp src/robots_mover.cpp src/robot_mover.cpp src/tsdf.cpp  src/cloud_processor.cpp)
@@ -39,11 +47,12 @@ add_definitions(${PCL_DEFINITIONS})
 # link_libraries(cloud_processor ${PCL_LIBRARIES})
 # 
 # set(SOURCE_FILES src/main.cpp src/object_scanner.cpp src/robots_mover.cpp src/robot_mover.cpp src/tsdf.cpp src/cloud_processor.cpp)
-add_executable(object_scanner src/main.cpp src/object_scanner.cpp src/robots_mover.cpp src/robot_mover.cpp src/tsdf.cpp src/cloud_processor.cpp)
+add_executable(object_scanner src/main.cpp src/object_scanner.cpp src/robots_mover.cpp src/robot_mover.cpp src/cloud_processor.cpp)
 target_link_libraries(object_scanner  ${catkin_LIBRARIES}
 				    ${PCL_LIBRARIES} 
 				    ${EIGEN_LIBRARIES} 
 				    ${Boost_LIBRARIES}
+				    libTSDF
 # 				    cloud_processor
 )
 
