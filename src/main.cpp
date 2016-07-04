@@ -10,6 +10,7 @@ int main(int argc, char **argv)
     ROS_INFO_STREAM("object_scanner main started");
     ObjectScanner* app = new ObjectScanner();
     
+    app->test();
     while (ros::ok())
     {
 

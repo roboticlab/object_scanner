@@ -11,3 +11,11 @@ ObjectScanner::~ObjectScanner()
 {
 
 }
+
+void ObjectScanner::test()
+{
+    _mover->moveToViewpoint();
+    ros::Duration(2.0).sleep();
+    _mover->rotateTableToStartPos();
+    ros::Duration(2.0).sleep();
+}
