@@ -1,7 +1,17 @@
 #include <object_scanner/object_scanner.h>
 void ObjectScanner::run()
 {
-    _cloud_processor->processCloud(1);
+    acqusitions_num = 5;
+    _cloud_processor->readTransform();
+    for (int i = 0; i < acqusitions_num; i++)
+    {
+	ROS_INFO_STREAM("Start processing cloud#" << i);
+	if (!_cloud_processor->processCloud())
+	{
+	    i--;
+	}
+    }    
+    ROS_INFO_STREAM("Done!");
 }
 ObjectScanner::ObjectScanner()
 {

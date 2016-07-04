@@ -1,32 +1,44 @@
 #include <object_scanner/cloud_processor.h>
 
 
-void CloudProcessor::processCloud(int times_num)
+bool CloudProcessor::processCloud()
 {
-    ROS_INFO_STREAM("CloudProcessor::processCloud");
-    rotateCloud(input_cloud, temp_cloud);
-    cutCloud(temp_cloud, temp2_cloud);
-    filterCloud(temp2_cloud, temp_cloud);  
-    alighnCloud(temp_cloud, output_cloud);
-        pcl::visualization::PCLVisualizer visualizer("Visualiser");
-    visualizer.addPointCloud(temp2_cloud, ColorHandlerTXYZRGB(temp2_cloud, 0.0, 0.0, 255.0), "temp2_cloud");    
-    visualizer.addPointCloud(output_cloud, ColorHandlerTXYZRGB(output_cloud, 0.0, 255.0, 0.0), "output_cloud");
-    visualizer.addCoordinateSystem();
-    visualizer.setBackgroundColor(0.0,0.0,0.0);    
-    while(!visualizer.wasStopped())
-    {
-	    visualizer.spinOnce();
-	    ros::Duration(0.05).sleep();
+    *input_cloud = *sensor_cloud;
+    if (input_cloud->points.size() > 0)
+    {	
+	rotateCloud(input_cloud, temp_cloud);
+	*rotated_cloud = *temp_cloud;
+	cutCloud(temp_cloud, temp2_cloud);
+	filterCloud(temp2_cloud, temp_cloud);  
+	removeNaNs(temp_cloud, temp2_cloud);
+	alighnCloud(temp2_cloud, output_cloud);
+// 	    pcl::visualization::PCLVisualizer visualizer("Visualiser");
+// // 	visualizer.addPointCloud(temp2_cloud, ColorHandlerTXYZRGB(temp2_cloud, 0.0, 0.0, 255.0), "temp2_cloud");    
+// 	visualizer.addPointCloud(output_cloud, ColorHandlerTXYZRGB(output_cloud, 0.0, 255.0, 0.0), "output_cloud");
+// 	visualizer.addCoordinateSystem();
+// 	visualizer.setBackgroundColor(0.0,0.0,0.0);    
+// 	while(!visualizer.wasStopped())
+// 	{
+// 		visualizer.spinOnce();
+// 		ros::Duration(0.05).sleep();
+// 	}
+	return true;
     }
-    ROS_INFO_STREAM("CloudProcessor::processCloud done");
+    else 
+    {
+	ROS_ERROR_STREAM("Sensor cloud has no points!");
+	return false;
+    }
 }
-void CloudProcessor::rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
+void CloudProcessor::readTransform()
 {
     std::string parent = "camera_rgb_optical_frame";
     std::string child = "rotary_table";
     tf::StampedTransform transform = getTransform(child, parent);
-    Eigen::Affine3d transform_eigen;
     tf::transformTFToEigen(transform, transform_eigen);
+}
+void CloudProcessor::rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
+{
     transformCloud(input, output, transform_eigen);
 }
 void CloudProcessor::cutCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
@@ -47,13 +59,10 @@ void CloudProcessor::filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, p
     float sigma_s = 3.0;
     float sigma_r = 0.01;
     bilateralFilter(input, output, sigma_r, sigma_s);
-    removeNaNs(output, output);
 }
 void CloudProcessor::alighnCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
 {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-    getIntegratedCloud(target_cloud);
-    icpAlighn(input, target_cloud, output);
+    icpAlighn(input, rotated_cloud, output);
 }
 void CloudProcessor::getIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
 {
@@ -128,12 +137,11 @@ void CloudProcessor::icpAlighn(pcl::PointCloud< pcl::PointXYZRGB >::Ptr _source,
     ICPAlighner.setTransformationEpsilon (1e-6);
     ICPAlighner.align (*_cloud_out);
 }
-
 // ---------------- Constructor, callbacks, common methods
 void CloudProcessor::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
     input_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
-    pcl::fromROSMsg(*pc_msg, *this->input_cloud);
+    pcl::fromROSMsg(*pc_msg, *this->sensor_cloud);
 }
 pcl::PointCloud< pcl::PointXYZRGB >::Ptr CloudProcessor::getAlighnedCloud()
 {
@@ -143,10 +151,12 @@ CloudProcessor::CloudProcessor()
 {
     subs_cloud_topic = "/camera/depth_registered/points";    
     cloud_subscriber =  nh_.subscribe(subs_cloud_topic,1,&CloudProcessor::pointCloudCallback, this);    
+    sensor_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     input_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     output_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     temp_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     temp2_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
+    rotated_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
 }
 CloudProcessor::~CloudProcessor()
 {

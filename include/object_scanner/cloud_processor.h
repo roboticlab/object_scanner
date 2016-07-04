@@ -1,6 +1,7 @@
 #ifndef __CLOUD_PROCESSOR_H_
 #define __CLOUD_PROCESSOR_H_
-
+#include <mutex>
+#include <condition_variable>
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -34,19 +35,24 @@ class CloudProcessor
 public:
     CloudProcessor();
     ~CloudProcessor();
-    void processCloud(int times_num);
+    bool processCloud();
+    void readTransform();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getAlighnedCloud();
-private:
-    std::string subs_cloud_topic;
-    
+private:    
+    std::string subs_cloud_topic;    
     ros::NodeHandle nh_;
     ros::Subscriber cloud_subscriber;
     
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr sensor_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr input_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp2_cloud;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr rotated_cloud;
     
+    Eigen::Affine3d transform_eigen;
+    
+    void getCloudVector(int times_num);
     void rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void cutCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
