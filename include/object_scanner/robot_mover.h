@@ -19,6 +19,7 @@ public:
     void moveToPose(std::vector<double>);
     void moveToInitialPose();
 private:
+    void waiting();
     std::vector<double> initial_pose;
     boost::shared_ptr< moveit::planning_interface::MoveGroup > move_group_ptr;
     const robot_state::JointModelGroup* joint_model_group;
