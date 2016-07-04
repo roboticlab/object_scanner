@@ -11,6 +11,7 @@ class ObjectScanner
 public:
     ObjectScanner();
     ~ObjectScanner();
+    void test();
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;
