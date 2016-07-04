@@ -25,13 +25,13 @@ RobotsMover::~RobotsMover()
 
 void RobotsMover::getRosParams()
 {
-    ros::param::param<std::string>("arm_movegroup_id", p.arm_group_id, "right_arm");
+    ros::param::param<std::string>("/arm_movegroup_id", p.arm_group_id, "right_arm");
     ros::param::param<std::string>("/table_movegroup_id", p.table_group_id, "left_arm");
     if (!ros::param::get("/camera_viewpoint", p.camera_viewpoint))
     {
         std::vector<double> angles;
         angles.resize(6);
-        angles[0] = RAD(-0.068);
+        angles[0] = RAD(-0.068);                                // Kawasaki
         angles[1] = RAD(7.397);
         angles[2] = RAD(-108.914);
         angles[3] = RAD(-69.871);
@@ -43,7 +43,7 @@ void RobotsMover::getRosParams()
     {
         std::vector<double> angles;
         angles.resize(6);
-        angles[0] = RAD(-32.296);
+        angles[0] = RAD(-32.296);                               // Kawasaki
         angles[1] = RAD(131.096);
         angles[2] = RAD(26.752);
         angles[3] = RAD(1.448);

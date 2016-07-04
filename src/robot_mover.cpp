@@ -21,7 +21,7 @@ RobotMover::~RobotMover()
 void RobotMover::moveToInitialPose()
 {
     moveToPose(initial_pose);
-    ROS_INFO("Set %s to initial point", move_group_ptr->getName().c_str()); 
+    ROS_INFO_STREAM("Moved " << move_group_ptr->getName() << " to initial point"); 
 }
 
 void RobotMover::moveToPose(std::vector<double> angles)
@@ -32,4 +32,36 @@ void RobotMover::moveToPose(std::vector<double> angles)
     
     bool success = move_group_ptr->plan(plan);
     ROS_INFO("Survey %s", success ? "SUCCESS" : "FAILED"); 
+    move_group_ptr->asyncExecute(plan); 
+    waiting();
+}
+
+void RobotMover::waiting()
+{
+    ROS_INFO_STREAM("Waiting...");
+    robot_state::RobotState prev_state(*move_group_ptr->getCurrentState());
+    robot_state::RobotState curr_state(*move_group_ptr->getCurrentState());
+    const std::vector<std::string> &joint_names = joint_model_group->getJointModelNames();
+
+    bool isMoving = true;    
+    ros::Duration(2.0).sleep();
+
+    while (isMoving)
+    {
+        ros::Duration(1.0).sleep();
+        curr_state = *move_group_ptr->getCurrentState();
+
+        for(std::size_t i = 0; i < joint_names.size(); i++)
+        {
+            if (fabs(*(curr_state.getJointPositions(joint_names[i])) - *(prev_state.getJointPositions(joint_names[i]))) > 0.005)
+            {
+                isMoving = true;
+                break;
+            }
+            else
+                isMoving = false;
+        } 
+        prev_state = curr_state;
+    }
+    ROS_INFO_STREAM("Stopped waiting");
 }
