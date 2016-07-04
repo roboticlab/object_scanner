@@ -1,6 +1,7 @@
 #ifndef __ROBOT_MOVER_
 #define __ROBOT_MOVER_
 
+#include <math.h>
 #include <ros/ros.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -12,9 +13,13 @@
 class RobotMover
 {
 public:
-    RobotMover();
+    RobotMover(std::string, std::vector<double>);
     ~RobotMover();
+    
+    void moveToPose(std::vector<double>);
+    void moveToInitialPose();
 private:
+    std::vector<double> initial_pose;
     boost::shared_ptr< moveit::planning_interface::MoveGroup > move_group_ptr;
     const robot_state::JointModelGroup* joint_model_group;
     moveit::planning_interface::MoveGroup::Plan plan;
