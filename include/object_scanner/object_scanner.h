@@ -6,6 +6,7 @@
 #include <object_scanner/tsdf.h>
 #include <object_scanner/cloud_processor.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/io/ply_io.h>
 
 class ObjectScanner
 {

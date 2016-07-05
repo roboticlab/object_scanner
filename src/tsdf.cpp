@@ -13,9 +13,7 @@ TSDF::TSDF(float min_weight_, float xsize, float ysize, float zsize, int xres, i
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TSDF::getCloud(Eigen::Affine3d trans)
 {
 	pcl::PointCloud<pcl::PointNormal>::Ptr raytraced = tsdf->renderView(trans);		
-// 	pcl::PointCloud<pcl::Intensity>::Ptr _raytraced = tsdf->getIntensityCloud(trans);	
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudXYZRGB (new pcl::PointCloud<pcl::PointXYZRGB>);
-// 	pcl::PointCloud<pcl::PointXYZ>::Ptr _cloudXYZ (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::copyPointCloud(*raytraced, *cloudXYZRGB);
 	return cloudXYZRGB;
 }

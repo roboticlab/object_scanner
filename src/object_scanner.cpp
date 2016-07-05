@@ -29,21 +29,30 @@ void ObjectScanner::TSDFtest()
 	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/0.pcd", *cloud0);
 	integrateCloud(*cloud0, Eigen::Affine3d::Identity());
 	
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud25 (new pcl::PointCloud<pcl::PointXYZRGB>);	
+	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/25.pcd", *cloud25);
+	integrateCloud(*cloud25, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
+	
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud50 (new pcl::PointCloud<pcl::PointXYZRGB>);	
 	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/50.pcd", *cloud50);
-// 	IntegrateCloud(*cloud50, Eigen::Affine3d::Identity());
-	integrateCloud(*cloud50, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
+	integrateCloud(*cloud50, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.04,0.0,0.0))));
+	
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud25_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::transformPointCloud (*cloud50, *cloud25_transformed, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
 	
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud50_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::transformPointCloud (*cloud50, *cloud50_transformed, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
+	pcl::transformPointCloud (*cloud50, *cloud50_transformed, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.04,0.0,0.0))));
 	
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_ = _tsdf->getCloud(Eigen::Affine3d::Identity());
 	
 	pcl::visualization::PCLVisualizer visualizer("Visualiser");
 	visualizer.addPointCloud(cloud0, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud0, 255.0, 0.0, 0.0), "cloud0");
+	visualizer.addPointCloud(cloud25_transformed, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud25_transformed, 250, 0.0, 250.0), "cloud25_transformed");
 	visualizer.addPointCloud(cloud50_transformed, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud50_transformed, 0.0, 0.0, 250.0), "cloud50_transformed");
 	visualizer.addPointCloud(cloud_, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud_, 0.0, 255.0, 0.0), "cloud_");
 	visualizer.setBackgroundColor(0.0,0.0,0.0);
+	
+	pcl::io::savePLYFileBinary ("/home/elena/catkin_ws/src/scaner/src/123.ply", getMesh());
 
 	while(!visualizer.wasStopped())
 	{
