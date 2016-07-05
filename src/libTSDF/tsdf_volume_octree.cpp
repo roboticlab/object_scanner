@@ -51,7 +51,7 @@ using std::vector;
 using std::string;
 using std::endl;
 
-cpu_tsdf::TSDFVolumeOctree::TSDFVolumeOctree()
+cpu_tsdf::TSDFVolumeOctree::TSDFVolumeOctree(double _focal_length_x_, double _focal_length_y_, double _principal_point_x_, double _principal_point_y_, int _image_width_, int _image_height_)
   : xres_ (512)
   , yres_ (512)
   , zres_ (512)
@@ -63,12 +63,12 @@ cpu_tsdf::TSDFVolumeOctree::TSDFVolumeOctree()
   , max_weight_ (100)
   , min_sensor_dist_ (0.3f)
   , max_sensor_dist_ (3.0f)
-  , focal_length_x_ (525.)
-  , focal_length_y_ (525.)
-  , principal_point_x_ (320)
-  , principal_point_y_ (240)
-  , image_width_ (640)
-  , image_height_ (480)
+  , focal_length_x_ (_focal_length_x_)
+  , focal_length_y_ (_focal_length_y_)
+  , principal_point_x_ (_principal_point_x_)
+  , principal_point_y_ (_principal_point_y_)
+  , image_width_ (_image_width_)
+  , image_height_ (_image_height_)
   , max_cell_size_x_ (0.5f)
   , max_cell_size_y_ (0.5f)
   , max_cell_size_z_ (0.5f)
@@ -289,7 +289,7 @@ cpu_tsdf::TSDFVolumeOctree::renderView (const Eigen::Affine3d &trans, int downsa
   float min_step = max_dist_neg_ * 3/4.;
 #pragma omp parallel for
   for (size_t i = 0; i < cloud->size (); ++i)
-  {
+  {  
     size_t x = i % new_width;
     size_t y = i / new_width;
     // Raytrace

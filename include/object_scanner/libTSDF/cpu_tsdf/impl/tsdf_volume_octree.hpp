@@ -59,8 +59,8 @@ cpu_tsdf::TSDFVolumeOctree::integrateCloud (
   for (size_t u = 0; u < cloud.width; u += px_step)
   {
     for (size_t v = 0; v < cloud.height; v += px_step)
-    {
-      const PointT &pt_surface_orig = cloud (u, v);
+    {      
+	  const PointT &pt_surface_orig = cloud (u, v);
       if (pcl_isnan (pt_surface_orig.z))
         continue;
       // Look at surroundings
@@ -88,7 +88,6 @@ cpu_tsdf::TSDFVolumeOctree::integrateCloud (
       }
     }
   }
-  
   // Do Frustum Culling to get rid of unseen voxels
   std::vector<cpu_tsdf::OctreeNode::Ptr> voxels_culled;
   getFrustumCulledVoxels(trans, voxels_culled);

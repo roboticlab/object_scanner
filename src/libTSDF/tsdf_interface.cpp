@@ -42,10 +42,11 @@
 #include <object_scanner/libTSDF/cpu_tsdf/tsdf_volume_octree.h>
 
 cpu_tsdf::TSDFInterface::Ptr
-cpu_tsdf::TSDFInterface::instantiateFromFile (const std::string &filename)
+cpu_tsdf::TSDFInterface::instantiateFromFile (const std::string &filename, 
+											  double _focal_length_x_, double _focal_length_y_, double _principal_point_x_, double _principal_point_y_, int _image_width_, int _image_height_)
 {
   // For now everything is an octree.
-  TSDFInterface::Ptr tsdf (new TSDFVolumeOctree);
+  TSDFInterface::Ptr tsdf (new TSDFVolumeOctree (_focal_length_x_, _focal_length_y_, _principal_point_x_, _principal_point_y_, _image_width_, _image_height_) );
   tsdf->load (filename);
   return (tsdf);
 }

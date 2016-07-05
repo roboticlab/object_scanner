@@ -133,7 +133,7 @@ namespace cpu_tsdf
     load (const std::string &filename) = 0;
 
     static TSDFInterface::Ptr
-    instantiateFromFile (const std::string &filename);
+    instantiateFromFile (const std::string &filename, double, double, double, double, int, int);
     
     /** \brief Accessor to trilinearly interpolated distance */
     virtual bool

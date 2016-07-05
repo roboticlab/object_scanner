@@ -54,7 +54,7 @@ namespace cpu_tsdf
     typedef boost::shared_ptr<TSDFVolumeOctree> Ptr;
     typedef boost::shared_ptr<const TSDFVolumeOctree> ConstPtr;
 
-    TSDFVolumeOctree ();
+    TSDFVolumeOctree (double, double, double, double, int, int);
     ~TSDFVolumeOctree ();
 
     /** \brief Set the resolution of the voxel grid
@@ -373,7 +373,7 @@ namespace cpu_tsdf
 
     // Cloud which stores the voxel centers
     pcl::PointCloud<pcl::PointXYZ>::Ptr voxel_centers_;
-    
+	
   };
 }
 
