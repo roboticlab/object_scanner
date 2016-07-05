@@ -17,6 +17,7 @@ private:
     TSDF* _tsdf;
     CloudProcessor* _cloud_processor;
     
+    
     int acqusitions_num;
 };
 
