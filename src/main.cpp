@@ -7,14 +7,13 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "object_scanner");
     ros::NodeHandle n;
-    ROS_INFO_STREAM("object_scanner main started");
-    
-    ros::AsyncSpinner spinner(4);
+    ros::AsyncSpinner spinner(0);
     spinner.start();
-
-    ObjectScanner* app = new ObjectScanner();
+    ROS_INFO_STREAM("object_scanner main started");
+    ObjectScanner* app = new ObjectScanner();   
     
-    app->test();
+    ros::Duration(1.0).sleep();
+    app->run();
     
     ros::waitForShutdown();
     return 0;
