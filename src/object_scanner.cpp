@@ -1,10 +1,30 @@
 #include <object_scanner/object_scanner.h>
-
 #include <pcl/filters/passthrough.h>
+void ObjectScanner::run()
+{
+    _mover->moveToViewpoint();
+    ros::Duration(2.0).sleep();
+    _mover->rotateTableToStartPos();
+    ros::Duration(2.0).sleep();
+    acqusitions_num = 5;
+    _cloud_processor->readTransform();
+    for (int i = 0; i < acqusitions_num; i++)
+    {
+	ROS_INFO_STREAM("Start processing cloud#" << i);
+	if (!_cloud_processor->processCloud())
+	{
+	    i--;
+	}
+    }    
+    ROS_INFO_STREAM("Done!");
+}
+<<<<<<< HEAD
+
 
 ObjectScanner::ObjectScanner(float min_weight_, float xsize, float ysize, float zsize, int xres, int yres, int zres, Eigen::Affine3d tsdf_center,
 							 double _focal_length_x_, double _focal_length_y_, double _principal_point_x_, double _principal_point_y_, int _image_width_, int _image_height_
 )
+
 {
     ROS_INFO_STREAM("Object scanner created");
     _mover = new RobotsMover();

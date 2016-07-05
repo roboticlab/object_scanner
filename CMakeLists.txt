@@ -12,7 +12,12 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  tf_conversions
   pcl_conversions
+  moveit_core
+  moveit_commander
+  moveit_msgs
+  moveit_ros_planning_interface
 )
 find_package(Eigen REQUIRED)
 find_package(FLANN REQUIRED)

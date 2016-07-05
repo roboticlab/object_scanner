@@ -13,6 +13,7 @@ class ObjectScanner
 public:
     ObjectScanner(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
     ~ObjectScanner();
+<<<<<<< HEAD
 	
 	template <typename PointT> 
 	void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)
@@ -23,11 +24,15 @@ public:
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr getCloud(Eigen::Affine3d);
 	pcl::PolygonMesh getMesh();
 	void TSDFtest();
-	
+    void run();
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;
     CloudProcessor* _cloud_processor;
+    
+    
+    int acqusitions_num;
+    // test master branch
 };
 
 #endif

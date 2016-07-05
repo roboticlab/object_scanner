@@ -7,8 +7,10 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "object_scanner");
     ros::NodeHandle n;
+    ros::AsyncSpinner spinner(0);
+    spinner.start();
     ROS_INFO_STREAM("object_scanner main started");
-	
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	float min_weight_ = 2; 
 	float xsize = 2;
@@ -29,11 +31,12 @@ int main(int argc, char **argv)
     ObjectScanner* app = new ObjectScanner(min_weight_, xsize, ysize, zsize, xres, yres, zres, tsdf_center, 
 										   _focal_length_x_, _focal_length_y_, _principal_point_x_, _principal_point_y_, _image_width_, _image_height_);
     
-    while (ros::ok())
-    {
-		ros::spinOnce();
-		ros::Duration(0.05).sleep();
-    }
+
+    
+    ros::Duration(1.0).sleep();
+    app->run();
+    
+    ros::waitForShutdown();
 
     return 0;
 }
