@@ -13,17 +13,17 @@ class ObjectScanner
 public:
     ObjectScanner(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
     ~ObjectScanner();
-<<<<<<< HEAD
-	
-	template <typename PointT> 
-	void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)
-	{
-		_tsdf->integrateCloud(cloud, trans);
-	};
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr getCloud(Eigen::Affine3d);
-	pcl::PolygonMesh getMesh();
-	void TSDFtest();
+    
+    template <typename PointT> 
+    void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)
+    {
+	    _tsdf->integrateCloud(cloud, trans);
+    };
+    
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getCloud(Eigen::Affine3d);
+    pcl::PolygonMesh getMesh();
+    
+    void TSDFtest();
     void run();
 private:
     RobotsMover* _mover;

@@ -18,8 +18,6 @@ void ObjectScanner::run()
     }    
     ROS_INFO_STREAM("Done!");
 }
-<<<<<<< HEAD
-
 
 ObjectScanner::ObjectScanner(float min_weight_, float xsize, float ysize, float zsize, int xres, int yres, int zres, Eigen::Affine3d tsdf_center,
 							 double _focal_length_x_, double _focal_length_y_, double _principal_point_x_, double _principal_point_y_, int _image_width_, int _image_height_
