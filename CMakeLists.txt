@@ -14,10 +14,14 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   pcl_conversions
+  moveit_core
+  moveit_commander
+  moveit_msgs
+  moveit_ros_planning_interface
 )
 find_package(Eigen REQUIRED)
 find_package(FLANN REQUIRED)
-find_package(PCL 1.8 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES object_scanner

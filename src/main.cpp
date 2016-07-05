@@ -13,13 +13,8 @@ int main(int argc, char **argv)
     ObjectScanner* app = new ObjectScanner();   
     
     ros::Duration(1.0).sleep();
- 
-    app->run();  
+    app->run();
     
-    while(ros::ok())
-    {
-	
-    }
-
+    ros::waitForShutdown();
     return 0;
 }

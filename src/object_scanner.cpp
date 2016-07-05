@@ -1,6 +1,11 @@
 #include <object_scanner/object_scanner.h>
 void ObjectScanner::run()
 {
+    _mover->moveToViewpoint();
+    ros::Duration(2.0).sleep();
+    _mover->rotateTableToStartPos();
+    ros::Duration(2.0).sleep();
+
     acqusitions_num = 5;
     _cloud_processor->readTransform();
     for (int i = 0; i < acqusitions_num; i++)
@@ -24,3 +29,4 @@ ObjectScanner::~ObjectScanner()
 {
 
 }
+
