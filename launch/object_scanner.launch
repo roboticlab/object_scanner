@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<launch>		
+	<node name="object_scanner_node" pkg="object_scanner" type="object_scanner" respawn="false" output="screen" >
+		<rosparam command="load" file="$(object_scanner)/config/cloud_processor.yaml"/>
+		<rosparam command="load" file="$(object_scanner)/config/robot_mover.yaml"/>	
+		<rosparam command="load" file="$(object_scanner)/config/tsdf.yaml"/>	
+	</node>	
+</launch>
