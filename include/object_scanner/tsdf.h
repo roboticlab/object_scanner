@@ -24,7 +24,7 @@ public:
     TSDF(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
 	
 	template <typename PointT> 
-	void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)
+	void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans = Eigen::Affine3d::Identity())
 	{
 		pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
 		normals->clear();

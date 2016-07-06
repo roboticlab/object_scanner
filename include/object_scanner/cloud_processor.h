@@ -37,8 +37,15 @@ public:
     ~CloudProcessor();
     bool processCloud();
     void readTransform();
+    void setAlighnCloud(bool alighn);
+    void setIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getAlighnedCloud();
-private:    
+    Eigen::Affine3d getLastTransform();
+private:  
+    bool _alighn;
+    
+    std::mutex m;
+    
     std::string subs_cloud_topic;    
     ros::NodeHandle nh_;
     ros::Subscriber cloud_subscriber;
@@ -49,15 +56,14 @@ private:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr temp2_cloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr rotated_cloud;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr integrated_cloud;
     
     Eigen::Affine3d transform_eigen;
     
-    void getCloudVector(int times_num);
     void rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void cutCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     void alighnCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
-    void getIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr output);
     tf::StampedTransform getTransform(std::string parent, std::string child);
     //PCL methods
     void transformCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output, Eigen::Affine3d transform);

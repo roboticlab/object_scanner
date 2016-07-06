@@ -6,17 +6,49 @@ void ObjectScanner::run()
     ros::Duration(2.0).sleep();
     _mover->rotateTableToStartPos();
     ros::Duration(2.0).sleep();
+    
     acqusitions_num = 5;
-    _cloud_processor->readTransform();
-    for (int i = 0; i < acqusitions_num; i++)
+    
+    int camera_points = 1;
+    
+    float angle = 10;
+    int steps = 360 / angle;
+    
+    for (int point_num = 0; point_num < camera_points; point_num++)
     {
-	ROS_INFO_STREAM("Start processing cloud#" << i);
-	if (!_cloud_processor->processCloud())
+	for (int step = 0; step < steps; step++)
 	{
-	    i--;
+	    _mover->rotateTable(step, angle);
+	    ROS_INFO_STREAM("Table rotated; step " << step << " of " << steps << "; angle: " << angle);
+	    
+	    _cloud_processor->readTransform();	    
+	    if (step == 0)
+	    {
+		_cloud_processor->setAlighnCloud(false);
+	    }
+	    else
+	    {
+		_cloud_processor->setAlighnCloud(true);
+		_cloud_processor->setIntegratedCloud(_tsdf->getCloud(_cloud_processor->getLastTransform().inverse()));
+	    }
+	    for (int i = 0; i < acqusitions_num; i++)
+	    {
+		ROS_INFO_STREAM("Start processing cloud#" << i);
+		if (!_cloud_processor->processCloud())
+		{
+		    i--;
+		}
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(_cloud_processor->getAlighnedCloud()); 
+		
+		_tsdf->integrateCloud<pcl::PointXYZRGB>(*cloud);
+	    }        
+	    
 	}
-    }    
-    ROS_INFO_STREAM("Done!");
+	
+    }
+    
+
+//     ROS_INFO_STREAM("Done!");
 }
 
 ObjectScanner::ObjectScanner(float min_weight_, float xsize, float ysize, float zsize, int xres, int yres, int zres, Eigen::Affine3d tsdf_center,
@@ -28,7 +60,7 @@ ObjectScanner::ObjectScanner(float min_weight_, float xsize, float ysize, float 
     _mover = new RobotsMover();
     _tsdf = new TSDF(min_weight_, xsize, ysize, zsize, xres, yres, zres, tsdf_center, _focal_length_x_, _focal_length_y_, _principal_point_x_, _principal_point_y_, _image_width_, _image_height_);	
     _cloud_processor = new CloudProcessor();
-	TSDFtest();
+//     TSDFtest();
 }
 ObjectScanner::~ObjectScanner()
 {

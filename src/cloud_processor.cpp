@@ -3,15 +3,28 @@
 
 bool CloudProcessor::processCloud()
 {
-    *input_cloud = *sensor_cloud;
+//     ROS_INFO_STREAM("1");
+    {
+	std::lock_guard<std::mutex> lock(m);
+// 	ROS_INFO_STREAM("2");
+	*input_cloud = *sensor_cloud;
+// 	ROS_INFO_STREAM("3");
+    }
+    
     if (input_cloud->points.size() > 0)
     {	
+	ROS_INFO_STREAM("	rotating cloud");
 	rotateCloud(input_cloud, temp_cloud);
 	*rotated_cloud = *temp_cloud;
+	ROS_INFO_STREAM("	cutting cloud");
 	cutCloud(temp_cloud, temp2_cloud);
+	ROS_INFO_STREAM("	filtering cloud");
 	filterCloud(temp2_cloud, temp_cloud);  
+	ROS_INFO_STREAM("	removeing nans");
 	removeNaNs(temp_cloud, temp2_cloud);
+	ROS_INFO_STREAM("	alighning cloud");
 	alighnCloud(temp2_cloud, output_cloud);
+	ROS_INFO_STREAM("	");
 // 	    pcl::visualization::PCLVisualizer visualizer("Visualiser");
 // // 	visualizer.addPointCloud(temp2_cloud, ColorHandlerTXYZRGB(temp2_cloud, 0.0, 0.0, 255.0), "temp2_cloud");    
 // 	visualizer.addPointCloud(output_cloud, ColorHandlerTXYZRGB(output_cloud, 0.0, 255.0, 0.0), "output_cloud");
@@ -62,12 +75,18 @@ void CloudProcessor::filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, p
 }
 void CloudProcessor::alighnCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
 {
-    icpAlighn(input, rotated_cloud, output);
+    if (_alighn)
+    {
+	icpAlighn(input, integrated_cloud, output);
+    }
+    else
+    {
+	*output = *input;
+    }
 }
-void CloudProcessor::getIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
+void CloudProcessor::setIntegratedCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 {
-    // Waiting for TSDF engine
-    *output = *input_cloud;
+    *integrated_cloud = *input;
 }
 tf::StampedTransform CloudProcessor::getTransform(std::string parent, std::string child)
 {
@@ -91,7 +110,10 @@ tf::StampedTransform CloudProcessor::getTransform(std::string parent, std::strin
 	ros::Duration(1).sleep();
     }
 }
-
+Eigen::Affine3d CloudProcessor::getLastTransform()
+{
+    return transform_eigen;
+}
 // ---------------- Pure PCL methods
 void CloudProcessor::transformCloud(pcl::PointCloud< pcl::PointXYZRGB >::Ptr input, pcl::PointCloud< pcl::PointXYZRGB >::Ptr output, Eigen::Affine3d transform)
 {
@@ -140,8 +162,14 @@ void CloudProcessor::icpAlighn(pcl::PointCloud< pcl::PointXYZRGB >::Ptr _source,
 // ---------------- Constructor, callbacks, common methods
 void CloudProcessor::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& pc_msg)
 {
-    input_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
+//     ROS_INFO_STREAM("		reading pointcloud");
+    std::lock_guard<std::mutex> lock(m);
+    sensor_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::fromROSMsg(*pc_msg, *this->sensor_cloud);
+}
+void CloudProcessor::setAlighnCloud(bool alighn)
+{
+    _alighn = alighn;
 }
 pcl::PointCloud< pcl::PointXYZRGB >::Ptr CloudProcessor::getAlighnedCloud()
 {
@@ -157,6 +185,8 @@ CloudProcessor::CloudProcessor()
     temp_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     temp2_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
     rotated_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
+    integrated_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
+    _alighn = true;
 }
 CloudProcessor::~CloudProcessor()
 {
