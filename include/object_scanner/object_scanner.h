@@ -1,5 +1,7 @@
 #ifndef __OBJECT_SCANNER_
 #define __OBJECT_SCANNER_
+#include <thread>
+
 
 #include <ros/ros.h>
 #include <object_scanner/robots_mover.h>
@@ -25,14 +27,18 @@ public:
     
     void TSDFtest();
     void run();
+    void runVisualizer();
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;
     CloudProcessor* _cloud_processor;
     
-    
+    pcl::visualization::PCLVisualizer::Ptr visualizer;
+
     int acqusitions_num;
-    // test master branch
+    
+    void runThread();
+    void visualizerThreadMethod();
 };
 
 #endif

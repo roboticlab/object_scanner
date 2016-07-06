@@ -2,6 +2,11 @@
 #include <pcl/filters/passthrough.h>
 void ObjectScanner::run()
 {
+    std::thread run_thread(&ObjectScanner::runThread, this);
+    run_thread.detach();
+}
+void ObjectScanner::runThread()
+{
     _mover->moveToViewpoint();
     ros::Duration(2.0).sleep();
     _mover->rotateTableToStartPos();
@@ -29,7 +34,19 @@ void ObjectScanner::run()
 	    else
 	    {
 		_cloud_processor->setAlighnCloud(true);
-		_cloud_processor->setIntegratedCloud(_tsdf->getCloud(_cloud_processor->getLastTransform().inverse()));
+// 		_cloud_processor->setIntegratedCloud(_tsdf->getCloud(_cloud_processor->getLastTransform().inverse()));
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr integrated_cloud(_tsdf->getCloud(Eigen::Affine3d::Identity())); 
+		ROS_INFO_STREAM("integrated_cloud points: " << integrated_cloud->points.size());
+		int nans = 0;
+		for (size_t i = 0; i < integrated_cloud->points.size(); i++)
+		{
+		    if (isnan(integrated_cloud->points[i].z))
+			nans++;
+		}
+		ROS_INFO_STREAM("nans: " << nans);
+		_cloud_processor->setIntegratedCloud(integrated_cloud);
+		visualizer->updatePointCloud(integrated_cloud, ColorHandlerTXYZRGB(integrated_cloud, 0.0, 255.0, 0.0),  "green_cloud");
+		ros::Duration(30).sleep();
 	    }
 	    for (int i = 0; i < acqusitions_num; i++)
 	    {
@@ -38,25 +55,21 @@ void ObjectScanner::run()
 		{
 		    i--;
 		}
-		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(_cloud_processor->getAlighnedCloud()); 
-		
-		_tsdf->integrateCloud<pcl::PointXYZRGB>(*cloud);
-	    }        
-	    
-	}
-	
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr alighned_cloud(_cloud_processor->getAlighnedCloud()); 
+		visualizer->updatePointCloud(alighned_cloud, ColorHandlerTXYZRGB(alighned_cloud, 0.0, 0.0, 255.0), "blue_cloud");
+		_tsdf->integrateCloud<pcl::PointXYZRGB>(*alighned_cloud);
+	    }        	    
+	}	
     }
-    
-
-//     ROS_INFO_STREAM("Done!");
+    ROS_INFO_STREAM("Done!");
 }
 
 ObjectScanner::ObjectScanner(float min_weight_, float xsize, float ysize, float zsize, int xres, int yres, int zres, Eigen::Affine3d tsdf_center,
 							 double _focal_length_x_, double _focal_length_y_, double _principal_point_x_, double _principal_point_y_, int _image_width_, int _image_height_
 )
-
 {
     ROS_INFO_STREAM("Object scanner created");
+    visualizer.reset(new pcl::visualization::PCLVisualizer("vis"));
     _mover = new RobotsMover();
     _tsdf = new TSDF(min_weight_, xsize, ysize, zsize, xres, yres, zres, tsdf_center, _focal_length_x_, _focal_length_y_, _principal_point_x_, _principal_point_y_, _image_width_, _image_height_);	
     _cloud_processor = new CloudProcessor();
@@ -73,41 +86,25 @@ pcl::PolygonMesh ObjectScanner::getMesh()
 {
 	return _tsdf->getMesh();
 }
-void ObjectScanner::TSDFtest()
+void ObjectScanner::runVisualizer()
 {
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud0 (new pcl::PointCloud<pcl::PointXYZRGB>);	
-	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/0.pcd", *cloud0);
-	integrateCloud(*cloud0, Eigen::Affine3d::Identity());
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud25 (new pcl::PointCloud<pcl::PointXYZRGB>);	
-	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/25.pcd", *cloud25);
-	integrateCloud(*cloud25, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud50 (new pcl::PointCloud<pcl::PointXYZRGB>);	
-	pcl::io::loadPCDFile ("/home/elena/catkin_ws/src/scaner/src/50.pcd", *cloud50);
-	integrateCloud(*cloud50, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.04,0.0,0.0))));
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud25_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::transformPointCloud (*cloud50, *cloud25_transformed, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.02,0.0,0.0))));
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud50_transformed (new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::transformPointCloud (*cloud50, *cloud50_transformed, Eigen::Affine3d(Eigen::Translation3d(Eigen::Vector3d(0.04,0.0,0.0))));
-	
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_ = _tsdf->getCloud(Eigen::Affine3d::Identity());
-	
-	pcl::visualization::PCLVisualizer visualizer("Visualiser");
-	visualizer.addPointCloud(cloud0, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud0, 255.0, 0.0, 0.0), "cloud0");
-	visualizer.addPointCloud(cloud25_transformed, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud25_transformed, 250, 0.0, 250.0), "cloud25_transformed");
-	visualizer.addPointCloud(cloud50_transformed, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud50_transformed, 0.0, 0.0, 250.0), "cloud50_transformed");
-	visualizer.addPointCloud(cloud_, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB>(cloud_, 0.0, 255.0, 0.0), "cloud_");
-	visualizer.setBackgroundColor(0.0,0.0,0.0);
-	
-	pcl::io::savePLYFileBinary ("/home/elena/catkin_ws/src/scaner/src/123.ply", getMesh());
-
-	while(!visualizer.wasStopped())
-	{
-		visualizer.spinOnce();
-		ros::Duration(0.005).sleep();
-	}
+    double scale = 0.1;
+    visualizer->addCoordinateSystem(scale);
+    visualizer->setBackgroundColor(0.0,0.0,0.0);   
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>); 
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 0.0, 0.0, 255.0), "blue_cloud");    
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 0.0, 255.0, 0.0), "green_cloud");
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 255.0, 0.0, 0.0), "red_cloud");
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 255.0, 255.0, 0.0), "yellow_cloud");
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 255.0, 0.0, 255.0), "purple_cloud");
+    visualizer->addPointCloud(cloud, ColorHandlerTXYZRGB(cloud, 0.0, 255.0, 255.0), "light_blue_cloud");
+    visualizer->spinOnce();
+    visualizer->addCoordinateSystem();
+    while(!visualizer->wasStopped())
+    {
+	    visualizer->spinOnce();
+	    ros::Duration(0.01).sleep();
+    }
 }
+
 
