@@ -10,6 +10,10 @@ TSDF::TSDF(float min_weight_, float xsize, float ysize, float zsize, int xres, i
 	tsdf->setGlobalTransform (tsdf_center);
 	tsdf->reset();
 }
+TSDF::~TSDF()
+{
+
+}
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TSDF::getCloud(Eigen::Affine3d trans)
 {
 	pcl::PointCloud<pcl::PointNormal>::Ptr raytraced = tsdf->renderView(trans);		

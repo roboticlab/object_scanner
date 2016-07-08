@@ -1,6 +1,5 @@
 #include <sstream>
 #include <ros/ros.h>
-
 #include <object_scanner/object_scanner.h>
 
 int main(int argc, char **argv)

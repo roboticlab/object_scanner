@@ -7,10 +7,19 @@
 #include <object_scanner/cloud_processor.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/io/ply_io.h>
+#include <pcl/filters/passthrough.h>
 
 class ObjectScanner
 {
 public:
+	
+	struct ObjectScannerParams
+    {
+		RobotsMover::RobotMoverParams robot_mover_params;
+		CloudProcessor::CloudProcessorParams cloud_processor_params;
+		TSDF::TSDFParams tsdf_params;
+    };
+	
     ObjectScanner(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
     ~ObjectScanner();
     

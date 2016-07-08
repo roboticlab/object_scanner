@@ -1,5 +1,5 @@
 #include <object_scanner/object_scanner.h>
-#include <pcl/filters/passthrough.h>
+
 void ObjectScanner::run()
 {
     _mover->moveToViewpoint();

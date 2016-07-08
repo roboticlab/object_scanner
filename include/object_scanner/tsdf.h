@@ -21,7 +21,28 @@
 class TSDF
 {
 public:
+	
+	struct TSDFParams
+    {
+		float min_weight;
+		float xsize;
+		float ysize;
+		float zsize;
+		int xres;
+		int yres;
+		int zres;
+		Eigen::Quaterniond tsdf_center_rotation;
+		Eigen::Vector3d tsdf_center_translation;
+		double focal_length_x;
+		double focal_length_y;
+		double principal_point_x;
+		double principal_point_y;
+		int image_width;
+		int image_height;
+    };
+	
     TSDF(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
+	~TSDF();
 	
 	template <typename PointT> 
 	void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)

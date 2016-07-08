@@ -25,19 +25,33 @@
 
 typedef pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> ColorHandlerTXYZRGB;
 
-// struct IcpParams
-// {
-// //     int max_iterations = 500;
-//     
-// };
 class CloudProcessor
 {
 public:
+	
+	struct CloudProcessorParams
+    {
+        std::string parent;
+        std::string child;    
+		float nx;
+		float px;
+		float ny;
+		float py;
+		float nz;
+		float pz;
+		float sigma_s;
+		float sigma_r;
+		int max_iterations;
+		float max_correspondence_distance;
+		float transformation_epsilon;
+    };
+	
     CloudProcessor();
     ~CloudProcessor();
     bool processCloud();
     void readTransform();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getAlighnedCloud();
+	
 private:    
     std::string subs_cloud_topic;    
     ros::NodeHandle nh_;

@@ -1,0 +1,5 @@
+robot_mover:
+  arm_group_id: right_arm
+  table_group_id: left_arm
+  camera_viewpoint: [-0.068, 7.397, -108.914, -69.871, -63.173, 102.539]
+  table_start_pose: [-32.296, 131.096, 26.752, 1.448, 101.565, 180.0]

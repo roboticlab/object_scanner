@@ -1,0 +1,14 @@
+cloud_processor:
+  parent: camera_rgb_optical_frame
+  child: rotary_table
+  nx: -0.3
+  px: 0.3
+  ny: -0.3
+  py: 0.3
+  nz: -0.1
+  pz: 0.4
+  sigma_s: 3.0
+  sigma_r: 0.01
+  max_iterations: 500
+  max_correspondence_distance: 0.01
+  transformation_epsilon: 0.000001
