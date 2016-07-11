@@ -32,9 +32,7 @@ bool CloudProcessor::processCloud()
 }
 void CloudProcessor::readTransform()
 {
-    std::string parent = "camera_rgb_optical_frame";
-    std::string child = "rotary_table";
-    tf::StampedTransform transform = getTransform(child, parent);
+    tf::StampedTransform transform = getTransform(params->child, params->parent);
     tf::transformTFToEigen(transform, transform_eigen);
 }
 void CloudProcessor::rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
@@ -42,23 +40,14 @@ void CloudProcessor::rotateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, p
     transformCloud(input, output, transform_eigen);
 }
 void CloudProcessor::cutCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
-{   
-    float nx = -0.3;
-    float px = 0.3;
-    float ny = -0.3;
-    float py = 0.3;
-    float nz = -0.1;
-    float pz = 0.4;
-    
-    passThroughFilter(input, output, "x", nx, px, true);
-    passThroughFilter(output, output, "y", ny, py, true);
-    passThroughFilter(output, output, "z", nz, pz, true);
+{
+    passThroughFilter(input, output, "x", params->nx, params->px, true);
+    passThroughFilter(output, output, "y", params->ny, params->py, true);
+    passThroughFilter(output, output, "z", params->nz, params->pz, true);
 }
 void CloudProcessor::filterCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
 {
-    float sigma_s = 3.0;
-    float sigma_r = 0.01;
-    bilateralFilter(input, output, sigma_r, sigma_s);
+    bilateralFilter(input, output, params->sigma_r, params->sigma_s);
 }
 void CloudProcessor::alighnCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, pcl::PointCloud<pcl::PointXYZRGB>::Ptr output)
 {
@@ -132,9 +121,9 @@ void CloudProcessor::icpAlighn(pcl::PointCloud< pcl::PointXYZRGB >::Ptr _source,
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> ICPAlighner;
     ICPAlighner.setInputSource(_source); //model
     ICPAlighner.setInputTarget (_target); //scene
-    ICPAlighner.setMaximumIterations (500);
-    ICPAlighner.setMaxCorrespondenceDistance (0.01);
-    ICPAlighner.setTransformationEpsilon (1e-6);
+    ICPAlighner.setMaximumIterations (params->max_iterations);
+    ICPAlighner.setMaxCorrespondenceDistance (params->max_correspondence_distance);
+    ICPAlighner.setTransformationEpsilon (params->transformation_epsilon);
     ICPAlighner.align (*_cloud_out);
 }
 // ---------------- Constructor, callbacks, common methods
@@ -147,8 +136,10 @@ pcl::PointCloud< pcl::PointXYZRGB >::Ptr CloudProcessor::getAlighnedCloud()
 {
     return output_cloud;
 }
-CloudProcessor::CloudProcessor()
+CloudProcessor::CloudProcessor(CloudProcessorParams* params_)
 {
+	params = params_;
+	
     subs_cloud_topic = "/camera/depth_registered/points";    
     cloud_subscriber =  nh_.subscribe(subs_cloud_topic,1,&CloudProcessor::pointCloudCallback, this);    
     sensor_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());

@@ -31,8 +31,8 @@ public:
 		int xres;
 		int yres;
 		int zres;
-		Eigen::Quaterniond tsdf_center_rotation;
-		Eigen::Vector3d tsdf_center_translation;
+		std::vector<double> tsdf_center_rotation;
+		std::vector<double> tsdf_center_translation;
 		double focal_length_x;
 		double focal_length_y;
 		double principal_point_x;
@@ -41,7 +41,7 @@ public:
 		int image_height;
     };
 	
-    TSDF(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
+    TSDF(TSDFParams*);
 	~TSDF();
 	
 	template <typename PointT> 

@@ -1,9 +1,11 @@
 <?xml version="1.0" ?>
-<launch>		
-<!--	<node name="object_scanner_node" pkg="object_scanner" type="object_scanner" respawn="false" output="screen" >-->
-	<node name="object_scaner_node" pkg="scaner" type="main_node" respawn="false" output="screen">
-		<rosparam command="load" file="$(find object_scanner)/config/cloud_processor.yaml"/>
-		<rosparam command="load" file="$(find object_scanner)/config/robot_mover.yaml"/>	
-		<rosparam command="load" file="$(find object_scanner)/config/tsdf.yaml"/>	
-	</node>	
+<launch>
+<!--	<include file="$(find bimanous_kawasaki_launch)/launch/demo.launch"/>-->
+
+	<rosparam command="load" file="$(find object_scanner)/config/cloud_processor.yaml"/>
+	<rosparam command="load" file="$(find object_scanner)/config/robot_mover.yaml"/>	
+	<rosparam command="load" file="$(find object_scanner)/config/tsdf.yaml"/>	
+	
+	<node name="object_scanner_node" pkg="object_scanner" type="object_scanner" respawn="false" output="screen" />
+
 </launch>

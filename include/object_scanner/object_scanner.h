@@ -15,12 +15,12 @@ public:
 	
 	struct ObjectScannerParams
     {
-		RobotsMover::RobotMoverParams robot_mover_params;
-		CloudProcessor::CloudProcessorParams cloud_processor_params;
-		TSDF::TSDFParams tsdf_params;
+		RobotsMover::RobotMoverParams* robot_mover_params;
+		CloudProcessor::CloudProcessorParams* cloud_processor_params;
+		TSDF::TSDFParams* tsdf_params;
     };
 	
-    ObjectScanner(float, float, float, float, int, int, int, Eigen::Affine3d, double, double, double, double, int, int);
+    ObjectScanner(ObjectScannerParams*);
     ~ObjectScanner();
     
     template <typename PointT> 
@@ -34,6 +34,7 @@ public:
     
     void TSDFtest();
     void run();
+	
 private:
     RobotsMover* _mover;
     TSDF* _tsdf;

@@ -46,13 +46,14 @@ public:
 		float transformation_epsilon;
     };
 	
-    CloudProcessor();
+    CloudProcessor(CloudProcessorParams*);
     ~CloudProcessor();
     bool processCloud();
     void readTransform();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getAlighnedCloud();
 	
-private:    
+private:  
+	CloudProcessorParams* params;
     std::string subs_cloud_topic;    
     ros::NodeHandle nh_;
     ros::Subscriber cloud_subscriber;

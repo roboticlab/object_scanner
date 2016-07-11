@@ -17,9 +17,8 @@ public:
         std::vector<double> camera_viewpoint;
         std::vector<double> table_start_pose;
     };
-    
-    RobotsMover();
-    RobotsMover(RobotsMover::RobotMoverParams);
+	
+    RobotsMover(RobotsMover::RobotMoverParams*);
     ~RobotsMover();
     
     void moveToViewpoint();
@@ -27,11 +26,10 @@ public:
     void rotateTable(int, float);
 
 private:
-    RobotMoverParams p;
+    RobotMoverParams* p;
     RobotMover* camera_mover;
     RobotMover* table_mover;
-    
-    void getRosParams();
+	std::vector<double> table_start_pose;
 };
 
 #endif
