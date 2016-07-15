@@ -83,8 +83,8 @@ include_directories(SYSTEM
   ${EIGEN_INCLUDE_DIRS} 
   ${PCL_INCLUDE_DIRS}
   ${CUDA_INCLUDE_DIRS}
-#   /home/elena/sources/pcl-pcl-1.8.0/gpu/features/include
-#   /home/elena/sources/pcl-pcl-1.8.0/gpu/utils/include
+  /home/elena/sources/pcl-pcl-1.8.0/gpu/features/include
+  /home/elena/sources/pcl-pcl-1.8.0/gpu/utils/include
 )
 
 link_directories(${PCL_LIBRARY_DIRS})

@@ -22,14 +22,9 @@ public:
 	
     ObjectScanner(ObjectScannerParams*);
     ~ObjectScanner();
-    
-    template <typename PointT> 
-    void integrateCloud(pcl::PointCloud<PointT> cloud, Eigen::Affine3d trans)
-    {
-	    _tsdf->integrateCloud(cloud, trans);
-    };
-    
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getCloud(Eigen::Affine3d);
+
+    void integrateCloud(pcl::PointCloud<pcl::PointXYZRGB>, Eigen::Affine3f);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getCloud(Eigen::Affine3f);
     pcl::PolygonMesh getMesh();
     
     void TSDFtest();

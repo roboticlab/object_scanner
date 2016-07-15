@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	
     ObjectScanner* app = new ObjectScanner(params);
 	
-    ros::Duration(1.0).sleep();
+//     ros::Duration(1.0).sleep();
 //     app->run();
     
     ros::waitForShutdown();

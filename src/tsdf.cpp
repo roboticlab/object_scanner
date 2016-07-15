@@ -2,77 +2,66 @@
 
 TSDF::TSDF(TSDFParams* params_)
 {
+    ROS_INFO_STREAM("1");
 	params = params_;
-	tsdf.reset(new TsdfVolume(Eigen::Vector3i(params->xres, params->yres, params->zres)));
-	tsdf->setSize(Eigen::Vector3f(params->xsize, params->ysize, params->zsize));
+	ROS_INFO_STREAM("2");
+	
+// 	tsdf = TsdfVolume::Ptr(new TsdfVolume(Eigen::Vector3i(params->xres, params->yres, params->zres)));
+	tsdf = TsdfVolume::Ptr(new TsdfVolume(Eigen::Vector3i(128, 128, 128)));
+	ROS_INFO_STREAM("3");
+	tsdf->setSize( Eigen::Vector3f(params->xsize, params->ysize, params->zsize) );
+	ROS_INFO_STREAM("4");
 	tsdf->reset();	
+	ROS_INFO_STREAM("5");
 	rayCaster.reset(new RayCaster(params->image_height, params->image_width, params->focal_length_x, params->focal_length_y, params->principal_point_x, params->principal_point_y) );
+	ROS_INFO_STREAM("6");
 	marchingCube.reset(new MarchingCubes());
+	ROS_INFO_STREAM("7");
 }
 TSDF::~TSDF()
 {
 
 }
-void TSDF::integrateCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudXYZRGB)
+void TSDF::integrateCloud(Eigen::Affine3f trans, pcl::PointCloud<pcl::PointXYZRGB> cloudXYZRGB)
 {
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ (new pcl::PointCloud<pcl::PointXYZ>); 
-	pcl::copyPointCloud(*cloudXYZRGB, *cloudXYZ);	
+	pcl::copyPointCloud(cloudXYZRGB, *cloudXYZ);	
 	std::vector<uint16_t> vec_image; 
 	std::vector<uint8_t> dummy;
 	pcl::io::OrganizedConversion<pcl::PointXYZ,false>::convert(*cloudXYZ, params->focal_length_x, 0, 1, false, vec_image, dummy);
-	int rows = cloudXYZ->height; 
-	int cols = cloudXYZ->width;
 	Depth depth;
-	depth.create(rows, cols);
+	depth.create(cloudXYZ->height, cloudXYZ->width);
 	int k = 0;
-	for (int i = 0; i < rows; i++) 
+	for (int i = 0; i < cloudXYZ->height; i++) 
 	{
-		for (int j = 0; j < cols; j++) 
+		for (int j = 0; j < cloudXYZ->width; j++) 
 		{
 			depth[i,j] = vec_image[k];
 			k++;
 		}
-	}
-	pcl::device::kinfuLS::Intr intr;
-	float3 f;
+	}	
+	pcl::device::kinfuLS::Intr intr (params->focal_length_x, params->focal_length_y, params->principal_point_x, params->principal_point_y);
+	float3 volume_size = make_float3 (params->xsize, params->ysize, params->zsize);
 	pcl::device::kinfuLS::Mat33 Rcurr_inv;
-
-// 	pcl::device::integrateTsdfVolume(depth, pcl::device::Intr(params->focal_length_x, params->focal_length_y, params->principal_point_x, params->principal_point_y), 
-// 									 float3(params->xsize, params->ysize, params->zsize), Rcurr_inv, tcurr, tranc_dist, volume);
-// 	pcl::device::kinfuLS::integrateTsdfVolume();
+	Rcurr_inv.data[0] = make_float3(trans.rotation()(0,0), trans.rotation()(0,1), trans.rotation()(0,2));
+	Rcurr_inv.data[1] = make_float3(trans.rotation()(1,0), trans.rotation()(1,1), trans.rotation()(1,2));
+	Rcurr_inv.data[2] = make_float3(trans.rotation()(2,0), trans.rotation()(2,1), trans.rotation()(2,2));
+	float3 tcurr = make_float3 (trans.translation().x(), trans.translation().y(), trans.translation().z());
+	pcl::device::kinfuLS::integrateTsdfVolume(depth, intr, volume_size, Rcurr_inv, tcurr, tsdf->getTsdfTruncDist(), tsdf->data());	
 }
-
-// void pcl::device::integrateTsdfVolume ( const PtrStepSz< ushort > & depth_raw,
-// const Intr & intr,
-// const float3 & volume_size,
-// const Mat33 & Rcurr_inv,
-// const float3 & tcurr,
-// float tranc_dist,
-// PtrStep< short2 > volume 
-// ) 
-// Performs Tsfg volume uptation (extra obsolete now)
-// 
-// Parameters
-// [in] depth_raw Kinect depth image
-// [in] intr camera intrinsics
-// [in] volume_size size of volume in mm
-// [in] Rcurr_inv inverse rotation for current camera pose
-// [in] tcurr translation for current camera pose
-// [in] tranc_dist tsdf truncation distance
-// [in] volume tsdf volume to be updated
-
-
-
-
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TSDF::getCloud(Eigen::Affine3f trans)
 {
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ (new pcl::PointCloud<pcl::PointXYZ>); 
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudXYZRGB (new pcl::PointCloud<pcl::PointXYZRGB>);
+	rayCaster->run(*tsdf, trans, new pcl::gpu::kinfuLS::tsdf_buffer);
+	MapArr vertexMap = rayCaster->getVertexMap();
 	
-	rayCaster->run(*tsdf, trans);
-	MapArr vertexMap = rayCaster->getVertexMap();		
-	pcl::gpu::kinfuLS::convertMapToOranizedCloud(vertexMap, *cloudXYZ);
+	pcl::gpu::DeviceArray2D<pcl::PointXYZ> arrayXYZ;
+	pcl::gpu::kinfuLS::convertMapToOranizedCloud(vertexMap, arrayXYZ);
 	
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ (new pcl::PointCloud<pcl::PointXYZ>);
+	for (int i = 0; i < arrayXYZ.rows(); i++) 
+		for (int j = 0; j < arrayXYZ.cols(); j++) 
+			cloudXYZ->points.push_back(arrayXYZ[i,j]);
+		
 // 	int rows = vertexMap.rows(); 
 // 	int cols = vertexMap.cols();
 // 	std::vector<float> vec_image; 
@@ -87,6 +76,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TSDF::getCloud(Eigen::Affine3f trans)
 // 	
 // 	pcl::io::OrganizedConversion<pcl::PointXYZ,false>::convert(vec_image, dummy, false, cols, rows, params->focal_length_x, *cloudXYZ);
 	
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudXYZRGB (new pcl::PointCloud<pcl::PointXYZRGB>);	
 	pcl::copyPointCloud(*cloudXYZ, *cloudXYZRGB);
 	return cloudXYZRGB;
 }
@@ -120,18 +110,4 @@ boost::shared_ptr<pcl::PolygonMesh> TSDF::convertToMesh(const pcl::gpu::DeviceAr
 		mesh_ptr->polygons[i] = v;
 	} 
 	return mesh_ptr;
-}
-boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> TSDF::depthToCloud(Depth* depth)
-{
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ (new pcl::PointCloud<pcl::PointXYZ>); 
-	
-	
-	
-	return cloudXYZ;
-}
-Depth* TSDF::cloudToDepth(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> cloudXYZ)
-{
-	Depth* depth  = new Depth; 
-	
-	return depth;
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <launch>
-	<include file="$(find bimanous_kawasaki_launch)/launch/demo.launch"/>
+<!-- 	<include file="$(find bimanous_kawasaki_launch)/launch/demo.launch"/> -->
 
 	<rosparam command="load" file="$(find object_scanner)/config/cloud_processor.yaml"/>
 	<rosparam command="load" file="$(find object_scanner)/config/robot_mover.yaml"/>	
